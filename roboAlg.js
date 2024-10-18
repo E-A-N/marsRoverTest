@@ -47,7 +47,7 @@ const Vector2D = (...startCoords) => {
 const Robot = (position, startCardinal, plane2D) => {
     let self = {};
     self.position = Vector2D(...position);
-    self.lastOkPosition = Object.assign({} ,self.position);;
+    self.viablePosition = Object.assign({} ,self.position);;
     self.cardinal = CardinalAliases[startCardinal];
     self.directionIndex = DirectionList.indexOf(self.cardinal);
     
@@ -93,12 +93,12 @@ const Robot = (position, startCardinal, plane2D) => {
                 break;
             }
 
-            self.lastOkPosition = Object.assign({} ,self.position);
+            self.viablePosition = Object.assign({} ,self.position);
         }
 
         let result =  [
-            self.lastOkPosition.coords[0],
-            self.lastOkPosition.coords[1],
+            self.viablePosition.coords[0],
+            self.viablePosition.coords[1],
             self.cardinal[0]
         ]
 

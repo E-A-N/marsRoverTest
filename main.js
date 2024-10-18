@@ -10,7 +10,6 @@ Streamer({
     inputFile: inputFile,
     outputFile: outputFile || "./output",
     onReadLine: (data, planeData) => {
-        // console.log("eandebug this is a readline event", data);
         let results = [];
         for (let i in data){
             let spec = data[i];
@@ -25,7 +24,6 @@ Streamer({
             );
         }
 
-        // let roro1 = Robot([2,2], "North", [3,3]);
         return results;
     }
 })

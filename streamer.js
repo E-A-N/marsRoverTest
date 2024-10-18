@@ -3,6 +3,7 @@ const { argv } = require('process');
 
 let self = {};
 self.initialized = false;
+self.complete = false;
 self.header = null;
 self.outputDestiny = "./output";
 self.onReadLine = null;
@@ -29,7 +30,6 @@ self.init = (spec) => {
         throw("please add callback for read line events!")
     }
 
-    console.log("eandebug input args:", argv);
     self.initialized = true;
     self.handleData();
     return self;
@@ -135,7 +135,9 @@ self.handleData =  () => {
             let processedData = self.onReadLine(cleanedData, self.header);
             self.write(processedData);
         }
-        console.log("we done!", self.header);
+
+        console.log("COMPLETE")
+        self.complete = true;
     })
 }
 
@@ -151,6 +153,11 @@ self.write = (data) => {
         writeStream.write(
             cleanedData[i].toString()
         )
+    }
+
+    if (self.complete){
+        writeStream.end();
+        process.exit();
     }
 }
 
