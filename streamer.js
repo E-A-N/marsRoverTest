@@ -35,6 +35,43 @@ self.init = (spec) => {
     return self;
 }
 
+self.middleware = (data) => {
+    let result = [];
+    for (let i in data){
+        let ugly = data[i];
+        let dirty = ugly.split(")");
+        let coordinates = dirty[0].split(",");
+        //clean the left parethensis
+        coordinates[0] = coordinates[0]
+            .slice(1, coordinates[0].length);
+            
+        //clean extra space from cardinal data
+        let startingCardinal = coordinates.pop()
+        startingCardinal =startingCardinal
+            .slice(1, dirty[1].length)
+
+        coordinates = coordinates.map((axis) => {
+            return Number(axis);
+        })
+        //clean space from instructions data
+        let pathInstructions = dirty[1]
+            .slice(1, dirty[1].length)
+        result.push({
+            position: coordinates,
+            cardinal: startingCardinal,
+            instructions: pathInstructions
+        });
+    }
+
+    return result;
+}
+
+self.headerMiddleWare = (data) => {
+    return data.split(" ").map((axis) => {
+        return Number(axis);
+    })
+}
+
 self.handleData =  () => {
     if (!self.initialized){
         throw("initialize streamer 1st!");
@@ -62,10 +99,13 @@ self.handleData =  () => {
         let lines = data.split("\n");
         if(!self.header){
             self.header = lines.splice(0,1)[0];
+            let cleanedData = self.headerMiddleWare(self.header);
+            self.header = cleanedData;
         }
         surplus = lines.pop();
         if (lines.length > 0){
-            let processedData = self.onReadLine(lines)
+            let cleanedData = self.middleware(lines);
+            let processedData = self.onReadLine(cleanedData, self.header);
             self.write(processedData, false);
         }
 
@@ -73,14 +113,15 @@ self.handleData =  () => {
 
     readStream.on('end', () => {
         if (surplus.length > 0){
-            let processedData = self.onReadLine([surplus])
-            self.write(processedData, true);
+            let cleanedData = self.middleware([surplus]);
+            let processedData = self.onReadLine(cleanedData, self.header);
+            self.write(processedData);
         }
         console.log("we done!", self.header);
     })
 }
 
-self.write = (data, finished) => {
+self.write = (data) => {
     const writeStream = self.dataStream.write;
 
     writeStream.on('error',  (error) => {
@@ -89,11 +130,11 @@ self.write = (data, finished) => {
 
     writeStream.write(JSON.stringify(data) + "\n");
 
-    if(finished){
-        writeStream.end();
-        console.log("PROGRAM COMPLETE");
-        process.exit();
-    }
+    // if(finished){
+    //     writeStream.end();
+    //     console.log("PROGRAM COMPLETE");
+    //     process.exit();
+    // }
 }
 
 module.exports = self.init;

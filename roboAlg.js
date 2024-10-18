@@ -5,6 +5,13 @@ const CardinalVectors = {
     West:  [-1, 0]
 }
 
+const CardinalAliases = {
+    "N": "North",
+    "E": "East",
+    "S": "South",
+    "W": "West"
+}
+
 const DirectionList = [
     "North",
     "East",
@@ -31,8 +38,8 @@ const Vector2D = (...startCoords) => {
 const Robot = (position, startCardinal, plane2D) => {
     let self = {};
     self.position = Vector2D(...position);
-    self.cardinal = startCardinal;
-    self.directionIndex = DirectionList.indexOf(startCardinal);
+    self.cardinal = CardinalAliases[startCardinal];
+    self.directionIndex = DirectionList.indexOf(self.cardinal);
     
     self.turn90 = (direction) => {
         let rotation = direction === "R" ? 1 : -1;
@@ -92,8 +99,8 @@ const Robot = (position, startCardinal, plane2D) => {
         return result;
     }
 
-    console.log("final:", self.followInstructions("FFLLRR"));
+    return self;
 }
 
 
-let roro1 = Robot([2,2], "North", [3,3]);
+module.exports = Robot;
