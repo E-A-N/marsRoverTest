@@ -32,12 +32,22 @@ const Vector2D = (...startCoords) => {
         return self;
     }
 
+    self.subtract = (vectorIn) => {
+        self.coords = [
+            self.coords[0] + vectorIn.coords[0],
+            self.coords[1] + vectorIn.coords[1]
+        ]
+
+        return self;
+    }
+
     return self;
 }
 
 const Robot = (position, startCardinal, plane2D) => {
     let self = {};
     self.position = Vector2D(...position);
+    self.lastOkPosition = Object.assign({} ,self.position);;
     self.cardinal = CardinalAliases[startCardinal];
     self.directionIndex = DirectionList.indexOf(self.cardinal);
     
@@ -54,14 +64,11 @@ const Robot = (position, startCardinal, plane2D) => {
         }
 
         self.cardinal = DirectionList[self.directionIndex];
-        console.log(self.cardinal, self.directionIndex, DirectionList);
     }
 
     self.moveForward = () => {
         let directionVector = Vector2D(...CardinalVectors[self.cardinal])
         self.position.add(directionVector);
-
-        console.log(self.position.coords);
     }
 
     self.instructionMap = {
@@ -85,11 +92,13 @@ const Robot = (position, startCardinal, plane2D) => {
                 isLost = true;
                 break;
             }
+
+            self.lastOkPosition = Object.assign({} ,self.position);
         }
 
         let result =  [
-            self.position.coords[0],
-            self.position.coords[1],
+            self.lastOkPosition.coords[0],
+            self.lastOkPosition.coords[1],
             self.cardinal[0]
         ]
 

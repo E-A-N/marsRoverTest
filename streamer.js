@@ -44,7 +44,7 @@ self.middleware = (data) => {
         //clean the left parethensis
         coordinates[0] = coordinates[0]
             .slice(1, coordinates[0].length);
-            
+
         //clean extra space from cardinal data
         let startingCardinal = coordinates.pop()
         startingCardinal =startingCardinal
@@ -61,6 +61,22 @@ self.middleware = (data) => {
             cardinal: startingCardinal,
             instructions: pathInstructions
         });
+    }
+
+    return result;
+}
+
+self.middlewareOut = (data) => {
+    let result = [];
+    for (let i in data){
+        let dataPrep = data[i];
+        let output = `(${dataPrep[0]}, ${dataPrep[1]}, ${dataPrep[2]})`
+        if (dataPrep.length > 3){
+            output += ` ${dataPrep[3]}`;
+        }
+        output += "\n";
+
+        result.push(output);
     }
 
     return result;
@@ -91,6 +107,8 @@ self.handleData =  () => {
     const writeArgs = {
         highWaterMark: self.chunkSizeOut,
         encoding: "utf8",
+        newline: "\n",
+        flags: 'a'
     }
     self.dataStream.write = fs.createWriteStream(self.outputFile, writeArgs);
     let surplus = "";
@@ -128,13 +146,12 @@ self.write = (data) => {
         console.log(`An error occured while writing to the file. Error: ${error.message}`);
     });
 
-    writeStream.write(JSON.stringify(data) + "\n");
-
-    // if(finished){
-    //     writeStream.end();
-    //     console.log("PROGRAM COMPLETE");
-    //     process.exit();
-    // }
+    let cleanedData = self.middlewareOut(data);
+    for (let i in cleanedData){
+        writeStream.write(
+            cleanedData[i].toString()
+        )
+    }
 }
 
 module.exports = self.init;
