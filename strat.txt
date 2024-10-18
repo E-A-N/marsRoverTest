@@ -1,0 +1,15 @@
+- build streaming interface to gracefully handle program input
+    - extend to also handle program out
+- build method for deciding chunksize (handle manually at 1st)
+- hardcode the 1st line of program input as a header
+- construct matrix based on the header size
+- flatten the matrix to ease querys and indexing
+- write utility for querying a position in the matrix at instant speed
+- data model the robot (primarily for state handling)
+    - add moveForward method to update the robots position based on its facing direction
+    - add updateDirection to handle 90 degree state change for direction
+- bind L, F, R to quantitative inputs to navigate the robot
+- perform FIFO or left to right iteration of movement instructions
+    - check if the robot is out of the matrix bounds
+        - if out of bounds output current position with additional lost flag
+    - when reaching the end of input log the current position
