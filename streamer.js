@@ -50,6 +50,12 @@ self.handleData =  () => {
         console.log(`error: ${error.message}`);
     })
 
+    // intialize file output handler
+    const writeArgs = {
+        highWaterMark: self.chunkSizeOut,
+        encoding: "utf8",
+    }
+    self.dataStream.write = fs.createWriteStream(self.outputFile, writeArgs);
     let surplus = "";
     readStream.on('data', (chunk) => {
         let data = surplus + chunk;
@@ -59,41 +65,35 @@ self.handleData =  () => {
         }
         surplus = lines.pop();
         if (lines.length > 0){
-            self.onReadLine(lines);
+            let processedData = self.onReadLine(lines)
+            self.write(processedData, false);
         }
 
     });
 
     readStream.on('end', () => {
         if (surplus.length > 0){
-            self.onReadLine([surplus]);
+            let processedData = self.onReadLine([surplus])
+            self.write(processedData, true);
         }
         console.log("we done!", self.header);
     })
-
-    //handle file output
-    // const writeArgs = {
-    //     highWaterMark: self.chunkSizeOut,
-    //     encoding: "utf8",
-    // }
-    // self.dataStream.write = fs.createWriteStream(self.outputFile, writeArgs);
-    // const writeStream = self.dataStream.write;
 }
 
-self.writeFile = () => {
-    const writeStream = fs.createWriteStream(filePath, {
+self.write = (data, finished) => {
+    const writeStream = self.dataStream.write;
 
-    })
-}
+    writeStream.on('error',  (error) => {
+        console.log(`An error occured while writing to the file. Error: ${error.message}`);
+    });
 
+    writeStream.write(JSON.stringify(data) + "\n");
 
-console.log(argv);
-self.init({
-    chunkSizeIn: 10,
-    chunkSizeOut: 100,
-    inputFile: argv[2],
-    outputFile: argv[3] || "./output",
-    onReadLine: (data) => {
-        console.log("eandebug this is a readline event", data)
+    if(finished){
+        writeStream.end();
+        console.log("PROGRAM COMPLETE");
+        process.exit();
     }
-})
+}
+
+module.exports = self.init;
